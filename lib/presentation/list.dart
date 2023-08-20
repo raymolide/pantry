@@ -36,6 +36,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   Future<List<Product>> showProducts() async {
+    await _loadProducts();
     if (_search.text.isEmpty) {
       _products = products;
       return _products;
@@ -46,6 +47,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           .toList();
       return _products;
     }
+    setState(() {});
   }
 
   @override
@@ -148,61 +150,56 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     return Center(child: Text('Erro ao carregar os dados'));
                   }
                   _products = snapshot.data!;
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await _loadProducts();
-                      showProducts();
-                    },
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _products.length * 2 - 1 >= 0
-                          ? _products.length * 2 - 1
-                          : 0,
-                      itemBuilder: (context, initialIndex) {
-                        if (initialIndex.isOdd) {
-                          return Divider();
-                        }
-                        int index = initialIndex ~/ 2;
-                        return ListTile(
-                            leading: Checkbox(
-                              value: isChecked,
-                              onChanged: (value) {
-                                setState(() {
-                                  isChecked = value!;
-                                });
-                              },
-                            ),
-                            title: Text(_products[index].name),
-                            subtitle: Text(_products[index].description),
-                            trailing: Container(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.blue,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pushNamed(context, "/edit",
-                                          arguments: _products[index]);
-                                    },
+                  return ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: _products.length * 2 - 1 >= 0
+                        ? _products.length * 2 - 1
+                        : 0,
+                    itemBuilder: (context, initialIndex) {
+                      if (initialIndex.isOdd) {
+                        return Divider();
+                      }
+                      int index = initialIndex ~/ 2;
+                      return ListTile(
+                          leading: Checkbox(
+                            value: isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                isChecked = value!;
+                              });
+                            },
+                          ),
+                          title: Text(_products[index].name),
+                          subtitle: Text(_products[index].description),
+                          trailing: Container(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
                                   ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      _products.remove(_products[index]);
-                                      _productService
-                                          .removeProduct(_products[index].id);
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, "/edit",
+                                        arguments: _products[index]);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    _products.remove(_products[index]);
+                                    _productService
+                                        .removeProduct(_products[index].id);
 
-                                      showProducts();
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ));
-                      },
-                    ),
+                                    showProducts();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ));
+                    },
                   );
                 }),
           ],
