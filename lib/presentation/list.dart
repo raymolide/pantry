@@ -24,11 +24,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   void initState() {
+    super.initState();
     () async {
       await _loadProducts();
       setState(() {});
     }();
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProducts() async {
